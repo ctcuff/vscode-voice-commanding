@@ -1,0 +1,84 @@
+{
+  "name": "voice-commanding",
+  "displayName": "voice-commanding",
+  "description": "Voice commanding for VS Code",
+  "version": "0.0.1",
+  "publisher": "ctcuff",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ctcuff/vscode-voice-commanding"
+  },
+  "engines": {
+    "vscode": "^1.58.2"
+  },
+  "cmake-js": {
+    "runtime": "electron",
+    "runtimeVersion": "12.0.3",
+    "arch": "x64"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "*"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "voice-commanding.toggleDictation",
+        "title": "Voice: Toggle Dictation",
+        "icon": {
+          "light": "./img/mic-light.svg",
+          "dark": "./img/mic-dark.svg"
+        }
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "when": "true",
+          "command": "voice-commanding.toggleDictation",
+          "group": "navigation"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "yarn run package",
+    "compile": "webpack",
+    "compile:all": "yarn native:compile && yarn compile",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "test-compile": "tsc -p ./",
+    "test-watch": "tsc -watch -p ./",
+    "pretest": "yarn run test-compile && yarn run lint",
+    "lint": "eslint src --ext ts",
+    "native:compile": "cmake-js compile",
+    "native:configure": "cmake-js configure"
+  },
+  "devDependencies": {
+    "@types/glob": "^7.1.3",
+    "@types/mocha": "^8.2.2",
+    "@types/node": "14.x",
+    "@types/vscode": "^1.58.0",
+    "@typescript-eslint/eslint-plugin": "^4.26.0",
+    "@typescript-eslint/parser": "^4.26.0",
+    "bindings": "~1.2.1",
+    "cmake-js": "^6.2.0",
+    "copy-webpack-plugin": "^9.0.1",
+    "dotenv-webpack": "^7.0.3",
+    "eslint": "^7.27.0",
+    "glob": "^7.1.7",
+    "mocha": "^8.4.0",
+    "napi-thread-safe-callback": "^0.0.6",
+    "node-addon-api": "^4.0.0",
+    "node-api-headers": "git://github.com/nodejs/node-api-headers",
+    "node-loader": "^2.0.0",
+    "ts-loader": "^9.2.2",
+    "typescript": "^4.3.2",
+    "vscode-test": "^1.5.2",
+    "webpack": "^5.38.1",
+    "webpack-cli": "^4.7.0"
+  }
+}

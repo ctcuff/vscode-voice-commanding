@@ -1,0 +1,10 @@
+out
+dist
+build
+pkgs
+node_modules
+src/lib/release/
+.vscode-test/
+*.vsix
+.env
+yarn-error.log
