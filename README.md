@@ -1,9 +1,9 @@
-# VSCode Voice Commanding
+# VS Code Voice Commanding
 
-A _extremely_ experimental extension for vscode that lets you execute a subset of vscode's commands with your voice using [Microsoft's Cognitive Service Speech SDK](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/)
+A _extremely_ experimental extension for VS Code that lets you execute a subset of the editor's commands with your voice using [Microsoft's Cognitive Service Speech SDK](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/)
 
 ## Requirements
-* vscode version 1.58.2 (any other versions must be running electron version 12.0.13)
+* VS Code version 1.58.2 (any other versions must be running electron version 12.0.13)
 * x64 Windows OS
 * [An Azure subscription key](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/overview#find-keys-and-locationregion)
 * [cmake](https://cmake.org/download/)
@@ -24,4 +24,4 @@ To build and run the extension, execute the following commands:
 * `yarn compile:all` - Build C++ code and compile TS code
 * `F5` - Start the extension
 
-In order to activate dictation, you'll need to have at least one file open. You should see a microphone icon at the top right of the editor. To get a sense of what commands and phrases you can say, take a look at [commanding.ts](/src/commanding.ts) and [extension.ts](/src/extension.ts)
+In order to activate dictation, you'll need to have at least one file open. You should see a microphone icon at the top right of the editor. To get a sense of what commands and phrases you can say, take a look at [command-map.ts](/src/command-map.ts) and [commanding.ts](/src/commanding.ts)

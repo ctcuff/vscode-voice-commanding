@@ -1,8 +1,4 @@
-declare namespace binding {
-  // functions.cc
-  export function greet(name: string): string
-  export function executeCallback(callback: (result: { success: boolean }) => void): void
-
+declare namespace Native {
   // voice_recognizer.cc
   export interface Intent {
     [key: string]: string
@@ -26,6 +22,8 @@ declare namespace binding {
 
   export class VoiceRecognizer {
     constructor(options: VoiceRecognizerOptions)
+    readonly hasSessionStarted: boolean
+
     addIntent(phrase: string, intentId: string): void
     addPhrase(phrase: string): void
     startRecognition(): void
@@ -35,4 +33,4 @@ declare namespace binding {
   }
 }
 
-export default binding
+export default Native

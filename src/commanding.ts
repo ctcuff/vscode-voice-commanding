@@ -1,46 +1,24 @@
 import * as vscode from 'vscode'
 import * as Util from './util'
 import * as path from 'path'
-import Native from './lib/binding'
-
-type CommandMap = {
-  [key: string]: string
-}
+import Native from './lib/native'
+import commandMap from './command-map'
 
 type FunctionMap = {
   [key: string]: () => void
 }
 
 /**
- * These commands should map to vscode's. The key is the exact occurrence
- * needed to execute the command
+ * These functions are triggered then a speech occurrence matches a key
+ * in this object. These don't (and shouldn't) contain any intents and should
+ * also be different from the commands used in the commandMap
  */
-const commandMap: CommandMap = {
-  'toggle dev tools': 'workbench.action.toggleDevTools',
-  'toggle developer tools': 'workbench.action.toggleDevTools',
-  'toggle dev panel': 'workbench.action.toggleDevTools',
-  'toggle developer panel': 'workbench.action.toggleDevTools',
-  'step over': 'workbench.action.debug.stepOver',
-  'start debugging': 'workbench.action.debug.start',
-  'stop debugging': 'workbench.action.debug.stop',
-  'break point': 'editor.debug.action.toggleBreakpoint',
-  breakpoint: 'editor.debug.action.toggleBreakpoint',
-  'toggle terminal': 'workbench.action.terminal.toggleTerminal',
-  'toggle side bar': 'workbench.action.toggleSidebarVisibility',
-  'toggle sidebar': 'workbench.action.toggleSidebarVisibility',
-  continue: 'workbench.action.debug.continue',
-  'step in to': 'workbench.action.debug.stepInto',
-  'step into': 'workbench.action.debug.stepInto',
-  'step out': 'workbench.action.debug.stepOut',
-  restart: 'workbench.action.debug.restart',
-  'close editor': 'workbench.action.closeActiveEditor',
-  reopen: 'workbench.action.reopenClosedEditor'
-}
-
 const functionMap: FunctionMap = {
   save: saveCurrentFile,
   'remove all breakpoints': removeAllBreakpoints,
-  'remove all break points': removeAllBreakpoints
+  'remove all break points': removeAllBreakpoints,
+  'run code': runCurrentFile,
+  'new line': () => insertText('\n')
 }
 
 function insertText(text: string, isComment = false) {
@@ -61,13 +39,14 @@ function insertText(text: string, isComment = false) {
   })
 }
 
+// TODO: Creating a file is buggy???
 function openNewFile(fileName: string) {
   const rootPath = vscode.workspace.workspaceFolders?.[0]?.uri.path || ''
   const newFile = vscode.Uri.parse(
     'untitled:' + path.join(rootPath.slice(1), `${fileName.replace(/ /g, '-')}.txt`)
   )
-  console.log(newFile)
-  vscode.workspace.openTextDocument(newFile).then(document => {    
+
+  vscode.workspace.openTextDocument(newFile).then(document => {
     vscode.window.showTextDocument(document)
   })
 }
@@ -82,12 +61,18 @@ function moveCursor(lineNumber: number) {
   const position = activeEditor.selection.active
   const newPosition = position.with(lineNumber - 1, 0)
   const newSelection = new vscode.Selection(newPosition, newPosition)
+  
+  // Used to make sure the editor moves downward a few extra
+  // lines to reveal the cursor
+  const editorRange = new vscode.Selection(
+    newPosition.with(lineNumber + 10, 0),
+    newPosition
+  )
 
   activeEditor.selection = newSelection
-  activeEditor.revealRange(newSelection)
+  activeEditor.revealRange(editorRange)
 }
 
-// TODO: Make toggle actually remove the break point
 function toggleBreakpoint(lineNumber: number) {
   const activeEditor = vscode.window.activeTextEditor
   if (!activeEditor) {
@@ -98,13 +83,23 @@ function toggleBreakpoint(lineNumber: number) {
     activeEditor.document.uri,
     activeEditor.selection.active.with(lineNumber - 1)
   )
-  const breakpoint = new vscode.SourceBreakpoint(location)
+  const newBreakpoint = new vscode.SourceBreakpoint(location)
+  const currentBreakpoint = vscode.debug.breakpoints.find(breakpoint => {
+    return (
+      (breakpoint as vscode.SourceBreakpoint).location.range.start.line === lineNumber - 1
+    )
+  })
 
-  vscode.debug.addBreakpoints([breakpoint])
-  // console.log(vscode.debug.breakpoints[0])
+  if (currentBreakpoint) {
+    vscode.debug.removeBreakpoints([currentBreakpoint])
+  } else {
+    vscode.debug.addBreakpoints([newBreakpoint])
+  }
 }
 
-// This writes to VSCode's integrated terminal if it's showing
+/**
+ * Writes to VS Code's integrated terminal if it's showing
+ */
 function writeToTerminal(text: string) {
   if (!vscode.window.activeTerminal) {
     return
@@ -121,15 +116,28 @@ function saveCurrentFile() {
   vscode.window.activeTextEditor?.document.save()
 }
 
-export function handleResultText(text: string) {
-  if (commandMap[text]) {
-    vscode.commands.executeCommand(commandMap[text])
-  } else if (functionMap[text]) {
-    functionMap[text]()
+function runCurrentFile() {
+  if (!vscode.extensions.getExtension('formulahendry.code-runner')) {
+    vscode.window.showWarningMessage(
+      'This command requires extension formulahendry.code-runner'
+    )
+  } else {
+    vscode.commands.executeCommand('code-runner.run')
   }
 }
 
-export function handleIntentMatches(intentMatches: Native.Intent[]) {
+function handleTextResult(text: string) {
+  const command = commandMap[text]
+  const func = functionMap[text]
+
+  if (command) {
+    vscode.commands.executeCommand(command)
+  } else if (func) {
+    func()
+  }
+}
+
+function handleIntentMatches(intentMatches: Native.Intent[]) {
   intentMatches.forEach(intent => {
     if (intent.textInsertion) {
       insertText(intent.textInsertion, intent.id === 'Voice.InsertComment')
@@ -176,3 +184,5 @@ export function handleIntentMatches(intentMatches: Native.Intent[]) {
     }
   })
 }
+
+export { handleTextResult, handleIntentMatches }

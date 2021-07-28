@@ -23,9 +23,7 @@ endif()
 
 set(SOURCES
     src/native/main.cc
-    src/native/functions.cc
     src/native/voice_recognizer.cc
-
 )
 set(MICROSOFT_COGNITIVE_SERVICES_DIR ${PKG_ROOT}/Microsoft.CognitiveServices.Speech.1.18.0)
 
@@ -68,7 +66,7 @@ add_definitions(-DNAPI_VERSION=6)
 # Copy all .dll files to the build directory
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${MICROSOFT_COGNITIVE_SERVICES_DIR}/runtimes/win-x64/native/ $<TARGET_FILE_DIR:${PROJECT_NAME}>
-    # Copy the folder that contains the .node file to the lib directory. This is because
-    # we can't reference files outside of the src folders in TypeScript
+    # Copy the folder that contains the .node file to the lib directory.
+    # This is because we can't reference files outside of the src folders in TypeScript
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/build/Release ${CMAKE_CURRENT_LIST_DIR}/src/lib/release
 )

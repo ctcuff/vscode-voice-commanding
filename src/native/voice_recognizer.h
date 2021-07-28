@@ -23,7 +23,10 @@ private:
     void StopRecognition(const Napi::CallbackInfo &info);
     void SetRecognizingCallback(const Napi::CallbackInfo &info);
     void SetRecognizedCallback(const Napi::CallbackInfo &info);
+    void InitIntentRecognizer(std::string &key, std::string &region);
+    Napi::Value GetHasStarted(const Napi::CallbackInfo &info);
 
+    bool m_hasStarted = false;
     std::shared_ptr<IntentRecognizer> m_intentRecognizer;
     std::shared_ptr<PhraseListGrammar> m_phraseList;
     std::shared_ptr<ThreadSafeCallback> m_onRecognizingCallback;

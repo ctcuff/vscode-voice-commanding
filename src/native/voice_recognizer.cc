@@ -36,21 +36,34 @@ VoiceRecognizer::VoiceRecognizer(const Napi::CallbackInfo &info) : Napi::ObjectW
         return;
     }
 
-    std::shared_ptr<SpeechConfig> speechConfig  = SpeechConfig::FromSubscription(
-        args.Get("key").As<Napi::String>().Utf8Value(),
-        args.Get("region").As<Napi::String>().Utf8Value()
-    );
+    std::string key = args.Get("key").As<Napi::String>().Utf8Value();
+    std::string region = args.Get("region").As<Napi::String>().Utf8Value();
+
+    if (key.empty() || region.empty())
+    {
+        Napi::Error::New(env, "key and region must be non-empty strings").ThrowAsJavaScriptException();
+        return;
+    }
+
+    this->InitIntentRecognizer(key, region);
+}
+
+void VoiceRecognizer::InitIntentRecognizer(std::string &key, std::string &region)
+{
+    std::shared_ptr<SpeechConfig> speechConfig = SpeechConfig::FromSubscription(key, region);
 
     m_intentRecognizer = IntentRecognizer::FromConfig(speechConfig);
     m_phraseList = PhraseListGrammar::FromRecognizer(m_intentRecognizer);
 
-    m_intentRecognizer->SessionStarted.Connect([](const SessionEventArgs &event)
+    m_intentRecognizer->SessionStarted.Connect([this](const SessionEventArgs &event)
     {
+        m_hasStarted = true;
         std::cout << "Session started (ID: " << event.SessionId << ")" << std::endl;
     });
 
-    m_intentRecognizer->SessionStopped.Connect([](const SessionEventArgs &event)
+    m_intentRecognizer->SessionStopped.Connect([this](const SessionEventArgs &event)
     {
+        m_hasStarted = false;
         std::cout << "Session stopped (ID: " << event.SessionId << ")" << std::endl;
     });
 
@@ -141,7 +154,6 @@ void VoiceRecognizer::AddPhrase(const Napi::CallbackInfo &info)
     m_phraseList->AddPhrase(phrase);
 }
 
-
 void VoiceRecognizer::StartRecognition(const Napi::CallbackInfo &info)
 {
     m_intentRecognizer->StartContinuousRecognitionAsync();
@@ -164,6 +176,11 @@ void VoiceRecognizer::SetRecognizedCallback(const Napi::CallbackInfo &info)
     m_onRecognizedCallback = std::make_shared<ThreadSafeCallback>(callback);
 }
 
+Napi::Value VoiceRecognizer::GetHasStarted(const Napi::CallbackInfo &info)
+{
+    return Napi::Boolean::New(info.Env(), m_hasStarted);
+}
+
 void VoiceRecognizer::Init(Napi::Env &env, Napi::Object &exports)
 {
     Napi::Function func = DefineClass(
@@ -175,7 +192,8 @@ void VoiceRecognizer::Init(Napi::Env &env, Napi::Object &exports)
             InstanceMethod<&VoiceRecognizer::StartRecognition>("startRecognition"),
             InstanceMethod<&VoiceRecognizer::StopRecognition>("stopRecognition"),
             InstanceMethod<&VoiceRecognizer::SetRecognizingCallback>("onRecognizing"),
-            InstanceMethod<&VoiceRecognizer::SetRecognizedCallback>("onRecognized")
+            InstanceMethod<&VoiceRecognizer::SetRecognizedCallback>("onRecognized"),
+            InstanceAccessor<&VoiceRecognizer::GetHasStarted>("hasSessionStarted")
         }
     );
 

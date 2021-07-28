@@ -1,9 +1,9 @@
 /**
- * Takes a sentence containing a number as a string (like "10") and extracts
- * the first occurrence of that number.
+ * Takes a sentence or string containing a number as a string (like "9" or "nine")
+ * and extracts the first occurrence of that number.
  */
 export const parseNumberFromPhrase = (text: string): number => {
-  // Simple numbers like "one" through "nine" can be quickly parsed
+  // Simple single string numbers like "one" through "nine" can be quickly parsed
   const parsedNumber = wordToNumber(text)
 
   if (!Number.isNaN(parsedNumber)) {
