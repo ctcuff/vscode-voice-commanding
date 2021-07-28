@@ -1,4 +1,4 @@
-# VSCode voice-commanding
+# VSCode Voice Commanding
 
 A _extremely_ experimental extension for vscode that lets you execute a subset of vscode's commands with your voice using [Microsoft's Cognitive Service Speech SDK](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/)
 
