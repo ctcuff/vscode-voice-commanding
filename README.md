@@ -24,4 +24,4 @@ To build and run the extension, execute the following commands:
 * `yarn compile:all` - Build C++ code and compile TS code
 * `F5` - Start the extension
 
-In order to activate dictation, you'll need to have at least one file open. You should see a microphone icon at the top right of the editor. To get a sense of what commands and phrases you can say, take a look at [commanding.ts](/src/commanding.ts) and [extension.tx](/src/extension.ts)
+In order to activate dictation, you'll need to have at least one file open. You should see a microphone icon at the top right of the editor. To get a sense of what commands and phrases you can say, take a look at [commanding.ts](/src/commanding.ts) and [extension.ts](/src/extension.ts)
