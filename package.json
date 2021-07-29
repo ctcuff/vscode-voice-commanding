@@ -42,7 +42,13 @@
           "group": "navigation"
         }
       ]
-    }
+    },
+    "keybindings": [
+      {
+        "command": "voice-commanding.toggleDictation",
+        "key": "ctrl+alt+d"
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "yarn run package",
