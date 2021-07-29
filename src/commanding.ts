@@ -40,7 +40,7 @@ function insertText(text: string, isComment = false) {
 }
 
 // TODO: Creating a file is buggy???
-function openNewFile(fileName: string) {
+function createNewFile(fileName: string) {
   const rootPath = vscode.workspace.workspaceFolders?.[0]?.uri.path || ''
   const newFile = vscode.Uri.parse(
     'untitled:' + path.join(rootPath.slice(1), `${fileName.replace(/ /g, '-')}.txt`)
@@ -61,7 +61,7 @@ function moveCursor(lineNumber: number) {
   const position = activeEditor.selection.active
   const newPosition = position.with(lineNumber - 1, 0)
   const newSelection = new vscode.Selection(newPosition, newPosition)
-  
+
   // Used to make sure the editor moves downward a few extra
   // lines to reveal the cursor
   const editorRange = new vscode.Selection(
@@ -153,7 +153,7 @@ function handleIntentMatches(intentMatches: Native.Intent[]) {
     }
 
     if (intent.fileName) {
-      openNewFile(intent.fileName)
+      createNewFile(intent.fileName)
     }
 
     // The line number intent usually returns numbers as words,

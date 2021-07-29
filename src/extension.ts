@@ -17,7 +17,9 @@ const toggleDictation = () => {
 
 intentRecognizer.addPhrase('on line')
 
+intentRecognizer.addIntent('Create file {fileName}', 'Voice.CreateFile')
 intentRecognizer.addIntent('Create new file {fileName}', 'Voice.CreateFile')
+intentRecognizer.addIntent('New file {fileName}', 'Voice.CreateFile')
 
 intentRecognizer.addIntent('Add {numNewLines} new line', 'Voice.InsertNewLine')
 intentRecognizer.addIntent('Add {numNewLines} new lines', 'Voice.InsertNewLine')
@@ -70,7 +72,7 @@ intentRecognizer.onStopped(sessionId => {
 })
 
 export function activate(context: vscode.ExtensionContext) {
-  vscode.window.showInformationMessage('Extension activated!')
+  console.log('Extension activated')
 
   context.subscriptions.push(
     vscode.commands.registerCommand('voice-commanding.toggleDictation', toggleDictation)
