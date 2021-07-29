@@ -4,6 +4,9 @@
 #include <exception>
 #include "voice_recognizer.h"
 
+using namespace Microsoft::CognitiveServices::Speech;
+using namespace Microsoft::CognitiveServices::Speech::Intent;
+
 VoiceRecognizer::~VoiceRecognizer()
 {
     if (m_intentRecognizer)
@@ -58,13 +61,23 @@ void VoiceRecognizer::InitIntentRecognizer(std::string &key, std::string &region
     m_intentRecognizer->SessionStarted.Connect([this](const SessionEventArgs &event)
     {
         m_hasStarted = true;
-        std::cout << "Session started (ID: " << event.SessionId << ")" << std::endl;
+        std::string sessionId = event.SessionId;
+
+        m_onStartedCallback->call([sessionId](Napi::Env env, std::vector<napi_value> &args)
+        {
+            args = { Napi::String::New(env, sessionId) };
+        });
     });
 
     m_intentRecognizer->SessionStopped.Connect([this](const SessionEventArgs &event)
     {
         m_hasStarted = false;
-        std::cout << "Session stopped (ID: " << event.SessionId << ")" << std::endl;
+        std::string sessionId = event.SessionId;
+
+        m_onStoppedCallback->call([sessionId](Napi::Env env, std::vector<napi_value> &args)
+        {
+            args = { Napi::String::New(env, sessionId) };
+        });
     });
 
     m_intentRecognizer->Canceled.Connect([](const IntentRecognitionCanceledEventArgs &event)
@@ -154,14 +167,26 @@ void VoiceRecognizer::AddPhrase(const Napi::CallbackInfo &info)
     m_phraseList->AddPhrase(phrase);
 }
 
-void VoiceRecognizer::StartRecognition(const Napi::CallbackInfo &info)
+void VoiceRecognizer::StartContinuousRecognition(const Napi::CallbackInfo &info)
 {
     m_intentRecognizer->StartContinuousRecognitionAsync();
 }
 
-void VoiceRecognizer::StopRecognition(const Napi::CallbackInfo &info)
+void VoiceRecognizer::StopContinuousRecognition(const Napi::CallbackInfo &info)
 {
     m_intentRecognizer->StopContinuousRecognitionAsync();
+}
+
+void VoiceRecognizer::SetOnStartedCallback(const Napi::CallbackInfo &info)
+{
+    Napi::Function callback = info[0].As<Napi::Function>();
+    m_onStartedCallback = std::make_shared<ThreadSafeCallback>(callback);
+}
+
+void VoiceRecognizer::SetOnStoppedCallback(const Napi::CallbackInfo &info)
+{
+    Napi::Function callback = info[0].As<Napi::Function>();
+    m_onStoppedCallback = std::make_shared<ThreadSafeCallback>(callback);
 }
 
 void VoiceRecognizer::SetRecognizingCallback(const Napi::CallbackInfo &info)
@@ -189,8 +214,10 @@ void VoiceRecognizer::Init(Napi::Env &env, Napi::Object &exports)
         {
             InstanceMethod<&VoiceRecognizer::AddIntent>("addIntent"),
             InstanceMethod<&VoiceRecognizer::AddPhrase>("addPhrase"),
-            InstanceMethod<&VoiceRecognizer::StartRecognition>("startRecognition"),
-            InstanceMethod<&VoiceRecognizer::StopRecognition>("stopRecognition"),
+            InstanceMethod<&VoiceRecognizer::StartContinuousRecognition>("startContinuousRecognition"),
+            InstanceMethod<&VoiceRecognizer::StopContinuousRecognition>("stopContinuousRecognition"),
+            InstanceMethod<&VoiceRecognizer::SetOnStartedCallback>("onStarted"),
+            InstanceMethod<&VoiceRecognizer::SetOnStoppedCallback>("onStopped"),
             InstanceMethod<&VoiceRecognizer::SetRecognizingCallback>("onRecognizing"),
             InstanceMethod<&VoiceRecognizer::SetRecognizedCallback>("onRecognized"),
             InstanceAccessor<&VoiceRecognizer::GetHasStarted>("hasSessionStarted")
@@ -202,5 +229,5 @@ void VoiceRecognizer::Init(Napi::Env &env, Napi::Object &exports)
     *constructor = Napi::Persistent(func);
 
     env.SetInstanceData(constructor);
-    exports.Set("VoiceRecognizer", func);
+    exports.Set("IntentRecognizer", func);
 }

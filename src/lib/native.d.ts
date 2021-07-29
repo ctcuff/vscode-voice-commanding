@@ -1,35 +1,37 @@
 declare namespace Native {
-  // voice_recognizer.cc
   export interface Intent {
-    [key: string]: string
+    [intentName: string]: string
     id: string
     text: string
   }
 
-  export interface VoiceRecognizingCallbackArgs {
+  export interface OnRecognizingCallbackArgs {
     text: string
   }
 
-  export interface VoiceRecognizedCallbackArgs {
+  export interface OnRecognizedCallbackArgs {
     text: string
     intentMatches: Intent[]
   }
 
-  export interface VoiceRecognizerOptions {
+  export interface IntentRecognizerOptions {
     key: string
     region: string
   }
 
-  export class VoiceRecognizer {
-    constructor(options: VoiceRecognizerOptions)
+  export class IntentRecognizer {
     readonly hasSessionStarted: boolean
+
+    constructor(options: IntentRecognizerOptions)
 
     addIntent(phrase: string, intentId: string): void
     addPhrase(phrase: string): void
-    startRecognition(): void
-    stopRecognition(): void
-    onRecognizing(callback: (result: VoiceRecognizingCallbackArgs) => void): void
-    onRecognized(callback: (result: VoiceRecognizedCallbackArgs) => void): void
+    startContinuousRecognition(): void
+    stopContinuousRecognition(): void
+    onStarted(callback: (sessionId: string) => void): void
+    onStopped(callback: (sessionId: string) => void): void
+    onRecognizing(callback: (result: OnRecognizingCallbackArgs) => void): void
+    onRecognized(callback: (result: OnRecognizedCallbackArgs) => void): void
   }
 }
 

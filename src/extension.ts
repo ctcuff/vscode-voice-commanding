@@ -2,52 +2,51 @@ import * as vscode from 'vscode'
 import * as Commanding from './commanding'
 import Native from './lib/native'
 
-const voiceRecognizer = new Native.VoiceRecognizer({
+const intentRecognizer = new Native.IntentRecognizer({
   key: process.env.SUBSCRIPTION_KEY || '',
   region: process.env.REGION || ''
 })
 
 const toggleDictation = () => {
-  if (!voiceRecognizer.hasSessionStarted) {
-    vscode.window.showInformationMessage(
-      'Dictation session started. Speak into the microphone'
-    )
-    voiceRecognizer.startRecognition()
+  if (!intentRecognizer.hasSessionStarted) {
+    intentRecognizer.startContinuousRecognition()
   } else {
-    vscode.window.showInformationMessage('Dictation session ended')
-    voiceRecognizer.stopRecognition()
+    intentRecognizer.stopContinuousRecognition()
   }
 }
 
-voiceRecognizer.addPhrase('on line')
+intentRecognizer.addPhrase('on line')
 
-voiceRecognizer.addIntent('Create new file {fileName}', 'Voice.CreateFile')
+intentRecognizer.addIntent('Create new file {fileName}', 'Voice.CreateFile')
 
-voiceRecognizer.addIntent('Add {numNewLines} new line', 'Voice.InsertNewLine')
-voiceRecognizer.addIntent('Add {numNewLines} new lines', 'Voice.InsertNewLine')
+intentRecognizer.addIntent('Add {numNewLines} new line', 'Voice.InsertNewLine')
+intentRecognizer.addIntent('Add {numNewLines} new lines', 'Voice.InsertNewLine')
 
-voiceRecognizer.addIntent('Toggle break point line {breakpointLine}', 'Voice.Debugging')
-voiceRecognizer.addIntent('Toggle breakpoint line {breakpointLine}', 'Voice.Debugging')
-voiceRecognizer.addIntent(
+intentRecognizer.addIntent('Toggle break point line {breakpointLine}', 'Voice.Debugging')
+intentRecognizer.addIntent('Toggle breakpoint line {breakpointLine}', 'Voice.Debugging')
+intentRecognizer.addIntent(
   'Toggle break point on line {breakpointLine}',
   'Voice.Debugging'
 )
-voiceRecognizer.addIntent('Toggle breakpoint on line {breakpointLine}', 'Voice.Debugging')
-voiceRecognizer.addIntent('Breakpoint line {breakpointLine}', 'Voice.Debugging')
-voiceRecognizer.addIntent('Break point line {breakpointLine}', 'Voice.Debugging')
+intentRecognizer.addIntent(
+  'Toggle breakpoint on line {breakpointLine}',
+  'Voice.Debugging'
+)
+intentRecognizer.addIntent('Breakpoint line {breakpointLine}', 'Voice.Debugging')
+intentRecognizer.addIntent('Break point line {breakpointLine}', 'Voice.Debugging')
 
-voiceRecognizer.addIntent('Insert text {textInsertion}', 'Voice.InsertText')
-voiceRecognizer.addIntent('Insert comment {textInsertion}', 'Voice.InsertComment')
+intentRecognizer.addIntent('Insert text {textInsertion}', 'Voice.InsertText')
+intentRecognizer.addIntent('Insert comment {textInsertion}', 'Voice.InsertComment')
 
-voiceRecognizer.addIntent('{terminalPhrase} in terminal', 'Voice.Terminal')
+intentRecognizer.addIntent('{terminalPhrase} in terminal', 'Voice.Terminal')
 
-voiceRecognizer.addIntent('Move cursor to line {lineNumber}', 'Voice.Positioning')
-voiceRecognizer.addIntent('Go to line {lineNumber}', 'Voice.Positioning')
-voiceRecognizer.addIntent('Cursor line {lineNumber}', 'Voice.Positioning')
+intentRecognizer.addIntent('Move cursor to line {lineNumber}', 'Voice.Positioning')
+intentRecognizer.addIntent('Go to line {lineNumber}', 'Voice.Positioning')
+intentRecognizer.addIntent('Cursor line {lineNumber}', 'Voice.Positioning')
 
-voiceRecognizer.addIntent('Show message {dialogText}', 'Voice.Dialog')
+intentRecognizer.addIntent('Show message {dialogText}', 'Voice.Dialog')
 
-voiceRecognizer.onRecognized(result => {
+intentRecognizer.onRecognized(result => {
   if (result.text) {
     Commanding.handleTextResult(result.text.toLocaleLowerCase().replace('.', ''))
   }
@@ -56,6 +55,18 @@ voiceRecognizer.onRecognized(result => {
     console.log(result)
     Commanding.handleIntentMatches(result.intentMatches)
   }
+})
+
+intentRecognizer.onStarted(sessionId => {
+  console.log(`Session started (ID: ${sessionId})`)
+  vscode.window.showInformationMessage(
+    'Dictation session started, speak into your microphone'
+  )
+})
+
+intentRecognizer.onStopped(sessionId => {
+  console.log(`Session stopped (ID: ${sessionId})`)
+  vscode.window.showInformationMessage('Dictation session ended')
 })
 
 export function activate(context: vscode.ExtensionContext) {
@@ -67,7 +78,7 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 export function deactivate() {
-  if (voiceRecognizer.hasSessionStarted) {
-    voiceRecognizer.stopRecognition()
+  if (intentRecognizer.hasSessionStarted) {
+    intentRecognizer.stopContinuousRecognition()
   }
 }

@@ -3,7 +3,7 @@ type CommandMap = {
 }
 
 /**
- * These commands should map to vscode's command ids.
+ * These commands should map to VS Code's command ids.
  * The key is the exact occurrence needed to execute the command
  */
 const commandMap: CommandMap = {
