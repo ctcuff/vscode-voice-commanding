@@ -1,3 +1,6 @@
+import * as fs from 'fs'
+import * as vscode from 'vscode'
+
 /**
  * Takes a sentence or string containing a number as a string (like "9" or "nine")
  * and extracts the first occurrence of that number.
@@ -49,3 +52,21 @@ export const wordToNumber = (word: string): number => {
 
   return Number.NaN
 }
+
+export const doesFileExist = (path: string): Promise<boolean> => {
+  return new Promise(resolve => {
+    fs.stat(path, err => resolve(!err))
+  })
+}
+
+export const getCurrentFilePath = (): string | null => {
+  const currentDocument = vscode.window.activeTextEditor?.document
+
+  if (!currentDocument || currentDocument.uri.scheme !== 'file') {
+    return null
+  }
+
+  return currentDocument.uri.fsPath
+}
+
+export const wait = async (ms: number) => new Promise(resolve => setTimeout(resolve, ms))

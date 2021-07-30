@@ -24,6 +24,7 @@ endif()
 set(SOURCES
     src/native/main.cc
     src/native/voice_recognizer.cc
+    src/native/system.cc
 )
 set(MICROSOFT_COGNITIVE_SERVICES_DIR ${PKG_ROOT}/Microsoft.CognitiveServices.Speech.1.18.0)
 

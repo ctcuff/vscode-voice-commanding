@@ -1,23 +1,24 @@
-type CommandMap = {
-  [key: string]: string | undefined
-}
-
 /**
  * These commands should map to VS Code's command ids.
  * The key is the exact occurrence needed to execute the command
  */
-const commandMap: CommandMap = {
+const CommandMap = {
   'break point': 'editor.debug.action.toggleBreakpoint',
   breakpoint: 'editor.debug.action.toggleBreakpoint',
+  'clear notification': 'notifications.clearAll',
+  'clear notifications': 'notifications.clearAll',
   'close editor': 'workbench.action.closeActiveEditor',
   'close terminal': 'workbench.action.terminal.toggleTerminal',
   comment: 'editor.action.commentLine',
   continue: 'workbench.action.debug.continue',
   copy: 'editor.action.clipboardCopyAction',
+  'cursor down': 'cursorDown',
   'cursor left': 'cursorWordLeft',
   'cursor right': 'cursorWordEndRight',
+  'cursor up': 'cursorUp',
   cut: 'editor.action.clipboardCutAction',
   'delete line': 'editor.action.deleteLines',
+  'focus notification': 'notifications.focusToasts',
   'format document': 'editor.action.formatDocument',
   'go backward': 'workbench.action.navigateBack',
   'go back': 'workbench.action.navigateBack',
@@ -52,4 +53,4 @@ const commandMap: CommandMap = {
   undo: 'undo'
 }
 
-export default commandMap
+export default CommandMap

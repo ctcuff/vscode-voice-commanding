@@ -33,6 +33,15 @@ declare namespace Native {
     onRecognizing(callback: (result: OnRecognizingCallbackArgs) => void): void
     onRecognized(callback: (result: OnRecognizedCallbackArgs) => void): void
   }
+
+  export class System {
+    private constructor()
+    /**
+     * See {@link https://docs.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes Virtual-Key Codes documentation}
+     * for a list of acceptable key codes
+     */
+    static simulateInput(keyCode: number): void
+  }
 }
 
 export default Native

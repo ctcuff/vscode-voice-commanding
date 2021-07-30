@@ -210,7 +210,7 @@ void VoiceRecognizer::Init(Napi::Env &env, Napi::Object &exports)
 {
     Napi::Function func = DefineClass(
         env,
-        "VoiceRecognizer",
+        "IntentRecognizer",
         {
             InstanceMethod<&VoiceRecognizer::AddIntent>("addIntent"),
             InstanceMethod<&VoiceRecognizer::AddPhrase>("addPhrase"),

@@ -2,6 +2,14 @@ import * as vscode from 'vscode'
 import * as Commanding from './commanding'
 import Native from './lib/native'
 
+const statusBarItem = vscode.window.createStatusBarItem(
+  vscode.StatusBarAlignment.Right,
+  Infinity
+ )
+statusBarItem.text = '$(unmute) Dictation Active'
+statusBarItem.command = 'voice-commanding.toggleDictation'
+statusBarItem.tooltip = 'VS Code is using your microphone (click to stop)'
+
 const intentRecognizer = new Native.IntentRecognizer({
   key: process.env.SUBSCRIPTION_KEY || '',
   region: process.env.REGION || ''
@@ -39,6 +47,7 @@ intentRecognizer.addIntent('Break point line {breakpointLine}', 'Voice.Debugging
 
 intentRecognizer.addIntent('Insert text {textInsertion}', 'Voice.InsertText')
 intentRecognizer.addIntent('Insert comment {textInsertion}', 'Voice.InsertComment')
+intentRecognizer.addIntent('Comment line {lineNumber}', 'Voice.InsertComment.LineNumber')
 
 intentRecognizer.addIntent('{terminalPhrase} in terminal', 'Voice.Terminal')
 
@@ -47,6 +56,9 @@ intentRecognizer.addIntent('Go to line {lineNumber}', 'Voice.Positioning')
 intentRecognizer.addIntent('Cursor line {lineNumber}', 'Voice.Positioning')
 
 intentRecognizer.addIntent('Show message {dialogText}', 'Voice.Dialog')
+
+intentRecognizer.addIntent('Press key {keyName}', 'Voice.KeyboardInput')
+intentRecognizer.addIntent('Press {keyName}', 'Voice.KeyboardInput')
 
 intentRecognizer.onRecognized(result => {
   if (result.text) {
@@ -61,6 +73,7 @@ intentRecognizer.onRecognized(result => {
 
 intentRecognizer.onStarted(sessionId => {
   console.log(`Session started (ID: ${sessionId})`)
+  statusBarItem.show()
   vscode.window.showInformationMessage(
     'Dictation session started, speak into your microphone'
   )
@@ -68,6 +81,7 @@ intentRecognizer.onStarted(sessionId => {
 
 intentRecognizer.onStopped(sessionId => {
   console.log(`Session stopped (ID: ${sessionId})`)
+  statusBarItem.hide()
   vscode.window.showInformationMessage('Dictation session ended')
 })
 
