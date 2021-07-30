@@ -32,6 +32,7 @@ declare namespace Native {
     onStopped(callback: (sessionId: string) => void): void
     onRecognizing(callback: (result: OnRecognizingCallbackArgs) => void): void
     onRecognized(callback: (result: OnRecognizedCallbackArgs) => void): void
+    onCancelled(callback: (errorDetails: string) => void): void
   }
 
   export class System {

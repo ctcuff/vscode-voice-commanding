@@ -5,7 +5,7 @@ import Native from './lib/native'
 const statusBarItem = vscode.window.createStatusBarItem(
   vscode.StatusBarAlignment.Right,
   Infinity
- )
+)
 statusBarItem.text = '$(unmute) Dictation Active'
 statusBarItem.command = 'voice-commanding.toggleDictation'
 statusBarItem.tooltip = 'VS Code is using your microphone (click to stop)'
@@ -83,6 +83,11 @@ intentRecognizer.onStopped(sessionId => {
   console.log(`Session stopped (ID: ${sessionId})`)
   statusBarItem.hide()
   vscode.window.showInformationMessage('Dictation session ended')
+})
+
+intentRecognizer.onCancelled(errorDetails => {
+  statusBarItem.hide()
+  vscode.window.showErrorMessage(`Dictation session cancelled: ${errorDetails}`)
 })
 
 export function activate(context: vscode.ExtensionContext) {

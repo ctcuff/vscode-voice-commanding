@@ -74,15 +74,27 @@ void VoiceRecognizer::InitIntentRecognizer(std::string &key, std::string &region
         m_hasStarted = false;
         std::string sessionId = event.SessionId;
 
-        m_onStoppedCallback->call([sessionId](Napi::Env env, std::vector<napi_value> &args)
+        if (m_onStoppedCallback)
         {
-            args = { Napi::String::New(env, sessionId) };
-        });
+            m_onStoppedCallback->call([sessionId](Napi::Env env, std::vector<napi_value> &args)
+            {
+                args = { Napi::String::New(env, sessionId) };
+            });
+        }
     });
 
-    m_intentRecognizer->Canceled.Connect([](const IntentRecognitionCanceledEventArgs &event)
+    m_intentRecognizer->Canceled.Connect([this](const IntentRecognitionCanceledEventArgs &event)
     {
-        std::cout << "Session cancelled" << std::endl;
+        m_hasStarted = false;
+        std::string errorDetails = event.ErrorDetails;
+
+        if (m_onSessionCancelledCallback)
+        {
+            m_onSessionCancelledCallback->call([errorDetails](Napi::Env env, std::vector<napi_value>& args)
+            {
+                args = { Napi::String::New(env, errorDetails) };
+            });
+        }
     });
 
     m_intentRecognizer->Recognizing.Connect([this](const IntentRecognitionEventArgs &event)
@@ -201,6 +213,12 @@ void VoiceRecognizer::SetRecognizedCallback(const Napi::CallbackInfo &info)
     m_onRecognizedCallback = std::make_shared<ThreadSafeCallback>(callback);
 }
 
+void VoiceRecognizer::SetSessionCancelledCallback(const Napi::CallbackInfo &info)
+{
+    Napi::Function callback = info[0].As<Napi::Function>();
+    m_onSessionCancelledCallback = std::make_shared<ThreadSafeCallback>(callback);
+}
+
 Napi::Value VoiceRecognizer::GetHasStarted(const Napi::CallbackInfo &info)
 {
     return Napi::Boolean::New(info.Env(), m_hasStarted);
@@ -220,6 +238,7 @@ void VoiceRecognizer::Init(Napi::Env &env, Napi::Object &exports)
             InstanceMethod<&VoiceRecognizer::SetOnStoppedCallback>("onStopped"),
             InstanceMethod<&VoiceRecognizer::SetRecognizingCallback>("onRecognizing"),
             InstanceMethod<&VoiceRecognizer::SetRecognizedCallback>("onRecognized"),
+            InstanceMethod<&VoiceRecognizer::SetSessionCancelledCallback>("onCancelled"),
             InstanceAccessor<&VoiceRecognizer::GetHasStarted>("hasSessionStarted")
         }
     );

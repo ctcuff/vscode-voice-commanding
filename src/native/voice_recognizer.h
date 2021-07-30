@@ -22,6 +22,7 @@ private:
     void SetOnStoppedCallback(const Napi::CallbackInfo &info);
     void SetRecognizingCallback(const Napi::CallbackInfo &info);
     void SetRecognizedCallback(const Napi::CallbackInfo &info);
+    void SetSessionCancelledCallback(const Napi::CallbackInfo &info);
     void InitIntentRecognizer(std::string &key, std::string &region);
     Napi::Value GetHasStarted(const Napi::CallbackInfo &info);
 
@@ -30,6 +31,7 @@ private:
     std::shared_ptr<Microsoft::CognitiveServices::Speech::PhraseListGrammar> m_phraseList;
     std::shared_ptr<ThreadSafeCallback> m_onStartedCallback;
     std::shared_ptr<ThreadSafeCallback> m_onStoppedCallback;
+    std::shared_ptr<ThreadSafeCallback> m_onSessionCancelledCallback;
     std::shared_ptr<ThreadSafeCallback> m_onRecognizingCallback;
     std::shared_ptr<ThreadSafeCallback> m_onRecognizedCallback;
 };
